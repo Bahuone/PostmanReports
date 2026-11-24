@@ -1,0 +1,33 @@
+name: Testes de API com Newman
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Permite rodar manualmente pelo botão no GitHub
+
+jobs:
+  newman-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Newman e htmlextra
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Rodar coleção e gerar relatório HTML
+        run: |
+          newman run sua-colecao.json -r htmlextra --reporter-htmlextra-export ./relatorio/report.html
+
+      - name: Salvar relatório para download (Artifact)
+        if: always() # Garante que o relatório seja salvo mesmo se algum teste falhar
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-htmlextra
+          path: ./relatorio/report.html
